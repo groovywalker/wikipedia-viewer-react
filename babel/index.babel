@@ -1,0 +1,164 @@
+const url = "https://en.wikipedia.org/w/api.php?";
+
+$(document).ready(function() {
+
+  class Headline extends React.Component {
+    render() {
+      return (
+        <div className='text-center'>
+          <h1>Wikipedia Viewer</h1>
+        </div>
+      );
+    }
+  }
+
+  class Form extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = { value: '' };
+
+      this.handleChange = this.handleChange.bind(this);
+      this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    handleChange(event) {
+      this.setState({value: event.target.value});
+    }
+
+    handleSubmit(event) {
+      console.log("Value submitted: " + this.state.value);
+
+      event.preventDefault();
+    }
+
+    componentDidMount() {
+      console.log("Did mount");
+      
+      $("#search-form").on("submit", function(event){
+
+        event.preventDefault();
+
+        $("#search-result").empty();
+
+        $.ajax({
+          url: url,
+          data: {
+            action: "query",
+            prop: "extracts|info",
+            exsentences: 3,
+            exintro: 1,
+            explaintext: 1,
+            exlimit: 20,        
+            inprop: "url", 
+            format: "json",
+            utf8: 1,
+            formatversion: 2,
+            generator: "search",
+            gsrsearch: $("#search-bar").val(),
+            gsrwhat: "text"        
+          },
+          type: "GET",
+          dataType: "jsonp",
+        }).done(function(json) {
+
+          // This is line is check if json was retrieved (debugging)
+          console.log(json.query.pages[0]);
+
+          let query = json.query.pages;      
+
+          query.forEach(function(val) {
+
+            $("#search-result").append(
+              "<div id='search-returned'><h3><a href=" + val.fullurl + " target= '_blank'>" + val.title + "</a></h3><p>" + val.extract + "</p></div></a>"
+            );
+
+          });
+
+        });   
+
+      });      
+
+    }
+
+    render() {
+      return (
+        <div>
+
+          <div className='text-center'>
+            <form id='search-form' onSubmit={this.handleSubmit}>
+
+              <input type='text' name='search' className='form-control' 
+                id='search-bar' value={this.state.value} onChange={this.handleChange} />
+
+              <input type='submit' value='Submit' className='btn btn-primary' 
+                id='search-submit' />
+
+              <a href='https://en.wikipedia.org/wiki/Special:Random' target='_blank' className='btn btn-primary' id='search-random'>
+                I'm feeling lucky!</a>
+
+            </form>
+          </div>
+
+          <div id='search-result'></div>
+
+        </div>
+      );
+    }
+  }
+
+  class App extends React.Component {
+    render() {
+      return (
+        <div>
+          <Headline />
+          <Form />
+        </div>
+      );
+    }
+  }
+
+  ReactDOM.render(
+    <App />,
+    document.getElementById('root')
+  );  
+
+})
+
+
+
+
+
+
+
+// let xmlHttp = new XMLHttpRequest();;
+// xmlHttp.onreadystatechange = function() {
+//   if (this.readyState == 4 && this.status == 200) {
+//     let data = JSON.parse(this.responseText);
+
+//     // document.getElementById("search-returned").innerHTML = this.state.title;
+//   }
+
+
+//   xmlHttp.open("GET", "https://en.wikipedia.org/w/api.php?/w/api.php?action=query&format=json&prop=info%7Cextracts&generator=search&utf8=1&inprop=url&exsentences=3&exintro=1&explaintext=1&gsrsearch=" + this.state.value + "&gsrwhat=text", true);
+
+//   xmlHttp.send();
+// }
+
+
+
+
+//     let url = "https://en.wikipedia.org/w/api.php?/w/api.php?action=query&format=json&prop=info%7Cextracts&generator=search&utf8=1&inprop=url&exsentences=3&exintro=1&explaintext=1&gsrsearch=" + this.state.value + "&gsrwhat=text";
+
+//     let url2 = "https://en.wikipedia.org/w/api.php?/w/api.php?";
+
+//     let url3 = "https://en.wikipedia.org/w/api.php?/w/api.php?action=query&format=json&prop=info%7Cextracts&generator=search&utf8=1&inprop=url&exsentences=3&exintro=1&explaintext=1&gsrsearch=" + "godzilla" + "&gsrwhat=text";
+
+//     let url4 = "https://en.wikipedia.org/w/api.php?/w/api.php?action=query&format=json&prop=info%7Cextracts&generator=search&utf8=1&inprop=url&exsentences=3&exintro=1&explaintext=1&gsrwhat=text&gsrsearch=";
+
+//     fetch(url4 + this.state.value)
+//       .then((response) => {
+//       response.json()
+//     })
+//       .then((data) => {
+//       this.setState({json: data});
+//     });  
